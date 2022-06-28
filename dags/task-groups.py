@@ -21,15 +21,15 @@ def task_group_example():
     def extract_tasks():
 
         for data_string in data_strings:
-            @task(task_id='extract_{0}'.format(data_string), retries=2)
+            @task(task_id='extract_{0}'.format(data_string))
             def extract_data(data_string):
-                data = data_string[data_string]
+                data = data_strings[data_string]
                 order_data_dict = json.loads(data)
                 return order_data_dict
 
             extract_data(data_string)
 
-    @task(multiple_outputs=True)
+    @task()
     def transform():
         print("Data has been transformed")
 
