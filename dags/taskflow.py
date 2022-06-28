@@ -13,7 +13,7 @@ def decorators_etl():
         return order_data_dict
 
 
-    @task(multiple_outputs=True)
+    @task()
     def transform(order_data_dict: dict):
         total_order_value = 0
         for value in order_data_dict.values():
@@ -26,6 +26,6 @@ def decorators_etl():
         print(f"Total order value is: {total_order_value:.2f}")
 
 
-    load(transform(extract_data())["total_order_value"])
+    load(transform(extract_data()))
 
 tutorial_decorators_etl = decorators_etl()

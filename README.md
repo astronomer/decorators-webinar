@@ -24,7 +24,8 @@ The `dags/` directory in this project contains the following DAGs which highligh
 - `classic-python-operator.py`: Shows a 'before' basic ETL example wiwth three tasks using traditional Python operators.
 - `taskflow.py`: Shows the same ETL example as `classic-python-operator.py` but implemented using the Python task decorator.
 - `decorators-and-traditional.py`: Shows the same example as `taskflow.py` but with an additional `EmailOperator` at the end to highlight mixing decorators and traditional operators. Note that to run this DAG successfully you need to have SMTP set up in your Airflow environment.
-- `task-groups.py`: Shows an example of dynamically generating tasks in a task group using the task group decorator.
+- `task-groups-dynamic.py`: Shows an example of dynamically generating tasks in a task group using the task group decorator.
+- `task-groups.py`: Shows an example of using the task group decorator for two tasks whose outputs are used by a downstream task.
 
 Deploy Your Project Locally
 ===========================

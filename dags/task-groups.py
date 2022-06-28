@@ -5,35 +5,42 @@ import pendulum
 from datetime import datetime, timedelta
 
 
-data_strings = {
-    'apple': '{"1001": 301.27, "1002": 433.21, "1003": 502.22}',
-    'carrot': '{"1001": 305.62, "1002": 425.71, "1003": 504.18}', 
-    'banana': '{"1001": 310.14, "1002": 431.98, "1003": 503.55}',
-    'orange': '{"1001": 310.14, "1002": 431.98, "1003": 503.55}'
-}
-
-
 @dag(schedule_interval=None, start_date=pendulum.datetime(2021, 1, 1, tz="UTC"), catchup=False)
 
 def task_group_example():
 
-    @task_group(group_id='extracts')
-    def extract_tasks():
-
-        for data_string in data_strings:
-            @task(task_id='extract_{0}'.format(data_string))
-            def extract_data(data_string):
-                data = data_strings[data_string]
-                order_data_dict = json.loads(data)
-                return order_data_dict
-
-            extract_data(data_string)
+    @task(task_id='extract', retries=2)
+    def extract_data():
+        data_string = '{"1001": 301.27, "1002": 433.21, "1003": 502.22}'
+        order_data_dict = json.loads(data_string)
+        return order_data_dict
 
     @task()
-    def transform():
-        print("Data has been transformed")
+    def transform_sum(order_data_dict: dict):
+        total_order_value = 0
+        for value in order_data_dict.values():
+            total_order_value += value
 
+        return {"total_order_value": total_order_value}
 
-    extract_tasks() >> transform()
+    @task()
+    def transform_avg(order_data_dict: dict):
+        total_order_value = 0
+        for value in order_data_dict.values():
+            total_order_value += value
+            avg_order_value = total_order_value / len(order_data_dict)
+
+        return {"avg_order_value": avg_order_value}
+
+    @task_group
+    def transform_values(order_data_dict):
+        return {'avg': transform_avg(order_data_dict), 'total': transform_sum(order_data_dict)}
+
+    @task()
+    def load(order_values: dict):
+        print(f"Total order value is: {order_values['total']['total_order_value']:.2f} and average order value is: {order_values['avg']['avg_order_value']:.2f}")
+
+    load(transform_values(extract_data()))
+
     
 task_group_example = task_group_example()
